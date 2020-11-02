@@ -11,7 +11,7 @@ Run a model on `smallGrid` layout for 6000 episodes, of which 5000 episodes
 are used for training.
 
 ```
-$ python3 pacman.py -p PacmanDQN -n 6000 -x 5000 -l smallGrid
+$ python3 pacman.py -p PacmanDQN -g KeyboardGhost -k 1 -n 10 -x 0 -l mediumClassic
 ```
 
 ### Layouts
