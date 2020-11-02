@@ -31,7 +31,7 @@ class KeyboardAgent(Agent):
     def __init__(self, index=0):
 
         self.lastMove = Directions.STOP
-        self.index = index
+        self.index = 0 
         self.keys = []
 
     def getAction(self, state):

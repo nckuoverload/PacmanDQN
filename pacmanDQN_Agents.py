@@ -22,14 +22,15 @@ import game
 from collections import deque
 
 # Neural nets
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from DQN import *
 
 params = {
     # Model backups
-    'load_file': None,
-    'save_file': None,
-    'save_interval' : 10000, 
+    'load_file': "./saves/model-./saves_12498618_26243",
+    'save_file': "./saves",
+    'save_interval' : 100, 
 
     # Training parameters
     'train_start': 5000,    # Episodes before training starts
@@ -58,11 +59,11 @@ class PacmanDQN(game.Agent):
         self.params = params
         self.params['width'] = args['width']
         self.params['height'] = args['height']
-        self.params['num_training'] = args['numTraining']
+        self.params['num_training'] = 0
 
         # Start Tensorflow session
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.1)
-        self.sess = tf.Session(config = tf.ConfigProto(gpu_options = gpu_options))
+        gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.1)
+        self.sess = tf.compat.v1.Session(config = tf.ConfigProto(gpu_options = gpu_options))
         self.qnet = DQN(self.params)
 
         # time started
