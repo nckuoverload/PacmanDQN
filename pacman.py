@@ -97,11 +97,14 @@ class GameState:
         # GameState.explored.add(self)
         if self.isWin() or self.isLose():
             return []
-
         if agentIndex == 0:  # Pacman is moving
             return PacmanRules.getLegalActions(self)
         else:
             return GhostRules.getLegalActions(self, agentIndex)
+    def getKeyboardActions(self, agentIndex):
+        if self.isWin() or self.isLose():
+            return []
+        return GhostRules.getKeyboardActions(self, agentIndex)
 
     def generateSuccessor(self, agentIndex, action):
         """
@@ -405,6 +408,11 @@ class GhostRules:
     These functions dictate how ghosts interact with their environment.
     """
     GHOST_SPEED = 1.0
+    def getKeyboardActions(state, ghostIndex):
+        conf = state.getGhostState(ghostIndex).configuration
+        possibleActions = Actions.getPossibleActions(conf, state.data.layout.walls)
+        return possibleActions
+    getKeyboardActions = staticmethod(getKeyboardActions)
 
     def getLegalActions(state, ghostIndex):
         """
@@ -414,22 +422,19 @@ class GhostRules:
         conf = state.getGhostState(ghostIndex).configuration
         possibleActions = Actions.getPossibleActions(
             conf, state.data.layout.walls)
-#        print(possibleActions)
-#        reverse = Actions.reverseDirection(conf.direction)
-#        print(reverse)
-#        if Directions.STOP in possibleActions:
-#            possibleActions.remove(Directions.STOP)
-#        if reverse in possibleActions and len(possibleActions) > 1:
-#            possibleActions.remove(reverse)
-        print(possibleActions)
+        reverse = Actions.reverseDirection(conf.direction)
+        if Directions.STOP in possibleActions:
+            possibleActions.remove(Directions.STOP)
+        if reverse in possibleActions and len(possibleActions) > 1:
+            possibleActions.remove(reverse)
         return possibleActions
     getLegalActions = staticmethod(getLegalActions)
 
     def applyAction(state, action, ghostIndex):
 
         legal = GhostRules.getLegalActions(state, ghostIndex)
-        if action not in legal:
-            raise Exception("Illegal ghost action " + str(action))
+#        if action not in legal:
+#            raise Exception("Illegal ghost action " + str(action))
 
         ghostState = state.data.agentStates[ghostIndex]
         speed = GhostRules.GHOST_SPEED
@@ -536,9 +541,13 @@ def readCommand(argv):
                       help='Display output as text only', default=False)
     parser.add_option('-q', '--quietTextGraphics', action='store_true', dest='quietGraphics',
                       help='Generate minimal output and no graphics', default=False)
-    parser.add_option('-g', '--ghosts', dest='ghost',
+    parser.add_option('-g', '--ghosts1', dest='ghost1',
                       help=default(
-                          'the ghost agent TYPE in the ghostAgents module to use'),
+                          'the ghost1 agent TYPE in the ghostAgents module to use'),
+                      metavar='TYPE', default='RandomGhost')
+    parser.add_option('-i', '--ghosts2', dest='ghost2',
+                      help=default(
+                          'the ghost2 agent TYPE in the ghostAgents module to use'),
                       metavar='TYPE', default='RandomGhost')
     parser.add_option('-k', '--numghosts', type='int', dest='numGhosts',
                       help=default('The maximum number of ghosts to use'), default=4)
@@ -599,8 +608,12 @@ def readCommand(argv):
         options.numIgnore = int(agentOpts['numTrain'])
 
     # Choose a ghost agent
-    ghostType = loadAgent(options.ghost, noKeyboard)
-    args['ghosts'] = [ghostType(i + 1) for i in range(options.numGhosts)]
+    ghostType = loadAgent(options.ghost1, noKeyboard)
+    args['ghosts'] = []
+    if(options.numGhosts > 1):
+        ghostType2 = loadAgent(options.ghost2, noKeyboard) if options.ghost2 != "KeyboardGhost"  else loadAgent(options.ghost1, noKeyboard)
+        args['ghosts'] = [ghostType2(i + 1) for i in range(options.numGhosts-1)]
+    args['ghosts'].append(ghostType(options.numGhosts))
 
     # Choose a display format
     if options.quietGraphics:

@@ -56,7 +56,8 @@ class KeyboardGhost(GhostAgent):
         if keys != []:
             self.keys = keys
 
-        legal = state.getLegalActions(self.index)
+#        legal = state.getLegalActions(self.index)
+        legal = state.getKeyboardActions(self.index)
         move = self.getMove(legal)
 
         if move == Directions.STOP:
@@ -67,9 +68,8 @@ class KeyboardGhost(GhostAgent):
         if (self.STOP_KEY in self.keys) and Directions.STOP in legal:
             move = Directions.STOP
 
-#        if move not in legal:
-#            print("random")
-#            move = random.choice(legal)
+        if move not in legal:
+            move = Directions.STOP
 
         self.lastMove = move
         return move
@@ -95,7 +95,6 @@ class RandomGhost(GhostAgent):
         for a in state.getLegalActions(self.index):
             dist[a] = 1.0
         dist.normalize()
-        print("Random-----")
         return dist
 
 
